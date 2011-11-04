@@ -85,7 +85,11 @@ module Databasedotcom
         attr_hash = {}
         selection_attr = self.Id.nil? ? "createable" : "updateable"
         self.class.description["fields"].select { |f| f[selection_attr] }.collect { |f| f["name"] }.each { |attr| attr_hash[attr] = self.send(attr) }
-
+        
+        # handle special case where Person Accounts cannot have a Name field although API lists 
+        # this as an editable field (only editable for default Account type: Business Accunt)
+        attr_hash.delete_if { |key, value| key.to_s == "Name" } if attr_hash["IsPersonAccount"]
+        
         if self.Id.nil?
           self.Id = self.client.create(self.class, attr_hash).Id
         else
