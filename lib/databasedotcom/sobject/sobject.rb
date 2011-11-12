@@ -19,6 +19,14 @@ module Databasedotcom
         self.attributes=(attrs)
       end
 
+      # Returns a hash representing the state of this object
+      def attributes
+        self.class.attributes.inject({}) do |hash, attr|
+          hash[attr] = self.send(attr.to_sym)
+          hash
+        end
+      end
+      
       # Set attributes of this object, from a hash, in bulk
       def attributes=(attrs)
         attrs.each do |key, value|
@@ -345,7 +353,7 @@ module Databasedotcom
             when String
               value_str = "'#{av[1].gsub("'", "\\\\'")}'"
             when DateTime, Time
-              value_str = av[1].strftime("%Y-%m-%dT%H:%M:%S.%L%z").insert(-3, ":")
+              value_str = av[1].strftime(RUBY_VERSION.match(/^1.8/) ? "%Y-%m-%dT%H:%M:%S.000%z" : "%Y-%m-%dT%H:%M:%S.%L%z").insert(-3, ":")
             else
               value_str = av[1].to_s
           end
